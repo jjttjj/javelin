@@ -134,8 +134,9 @@
   (defn walk-bind1 [[sym bindings & body] local]
     (let [local     (atom local)
           bind1     (fn [[k v]]
-                      (with-let* [x [k (walk v @local)]]
-                        (swap! local conj k)))
+                      (let [x [k (walk v @local)]]
+                        (swap! local conj k)
+                        x))
           bindings  (mapcat bind1 (partition 2 bindings))]
       (to-list `(~sym [~@bindings] ~@(map #(walk % @local) body)))))
 
@@ -170,7 +171,7 @@
         (to-list `(~sym ~@fname ~@arities)))))
 
   (defn walk-passthru [x local]
-    (with-let* [s (gensym)] (swap! *pass* assoc s x)))
+    (let [s (gensym)] (swap! *pass* assoc s x) s))
 
   (defn walk-dot [[sym obj meth & more] local]
     (let [obj       (walk obj local)
@@ -223,8 +224,9 @@
 (defmacro cell=
   ([expr] (cell* expr &env))
   ([expr f]
-   `(with-let [c# (cell= ~expr)]
-      (set! (.-update c#) ~f))))
+   `(let [c# (cell= ~expr)]
+      (set! (.-update c#) ~f)
+      c#)))
 
 (defmacro set-cell!=
   ([c expr]
