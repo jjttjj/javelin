@@ -116,7 +116,7 @@
       quoted?   #(= 'quote (first %))
       unwrap1?  #(= 'clojure.core/unquote (first %))
       unwrap2?  #(= 'clojure.core/unquote-splicing (first %))
-      err1      #(format "formula expansion contains unsupported %s form" %)]
+      err1      #(str "formula expansion contains unsupported " % " form")]
 
   (defn unsupp? [x local]
     (let [op (first x)]
