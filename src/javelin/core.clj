@@ -13,7 +13,6 @@
     [clojure.walk    :refer [prewalk]]
     [clojure.pprint  :as p]
     [cljs.analyzer   :as a]
-    [clojure.java.io :as io]
     [clojure.string  :as s]))
 
 (declare walk)
@@ -197,7 +196,7 @@
             (quoted?   x) (walk-passthru x local)
             (unwrap1?  x) (walk-passthru (second x) local)
             (unwrap2?  x) (walk-passthru (list 'deref (second x)) local)
-            (unsupp?   x) (throw (Exception. (err1 (first x))))
+            (unsupp?   x) (throw (ex-info (err1 (first x)) {:x x}))
             :else         (to-list (map #(walk % local) x)))))
 
   (defn walk [x local]
