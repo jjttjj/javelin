@@ -100,7 +100,7 @@
                                       (with-meta (symbol nil (name bb)) (meta bb))
                                       bb)
                               bk    (if (symbol? bk) (list 'quote bk) bk)
-                              bv    (if-let [default ( defaults local)]
+                              bv    (if-let [default (get defaults local)]
                                       (list get gmap bk default)
                                       (list get gmap bk))]
                           (recur
