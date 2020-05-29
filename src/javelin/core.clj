@@ -21,12 +21,6 @@
 
 ;; util ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro with-let*
-  "Binds resource to binding and evaluates body.  Then, returns
-  resource.  It's a cross between doto and with-open."
-  [[binding resource] & body]
-  `(let [~binding ~resource] ~@body ~binding))
-
 #_(def destructure*
   "Select a version of #'destructure that works with the version of the CLJS
   compiler that is provided. Older versions of CLJS do not provide destructure
@@ -147,8 +141,9 @@
   (defn walk-bind1 [[sym bindings & body] local]
     (let [local     (atom local)
           bind1     (fn [[k v]]
-                      (with-let* [x [k (walk v @local)]]
-                        (swap! local conj k)))
+                      (let [x [k (walk v @local)]]
+                        (swap! local conj k)
+                        x))
           bindings  (mapcat bind1 (partition 2 bindings))]
       (to-list `(~sym [~@bindings] ~@(map #(walk % @local) body)))))
 
@@ -183,7 +178,7 @@
         (to-list `(~sym ~@fname ~@arities)))))
 
   (defn walk-passthru [x local]
-    (with-let* [s (gensym)] (swap! *pass* assoc s x)))
+    (let [s (gensym)] (swap! *pass* assoc s x) s))
 
   (defn walk-dot [[sym obj meth & more] local]
     (let [obj       (walk obj local)
